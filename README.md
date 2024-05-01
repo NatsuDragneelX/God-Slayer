@@ -83,43 +83,63 @@ Expected Output: Quits the program (The program should terminate without outputt
 
 Enter expression (add ; to end, q to quit): 3 + 4;
 Result: 7
+
 Enter expression (add ; to end, q to quit): 10 - 2;
 Result: 8
+
 Enter expression (add ; to end, q to quit): 5 * 6;
 Result: 30
+
 Enter expression (add ; to end, q to quit): 20 / 5;
 Result: 4
+
 Enter expression (add ; to end, q to quit): pi;
 Result: 3.14159
+
 Enter expression (add ; to end, q to quit): tau / 2;
 Result: 3.14159
+
 Enter expression (add ; to end, q to quit): x = 5;
 Result: 5
+
 Enter expression (add ; to end, q to quit): x;
 Result: 5
+
 Enter expression (add ; to end, q to quit): 3 + 4 * 5;
 Result: 23
+
 Enter expression (add ; to end, q to quit): (3 + 4) * 5;
 Result: 35
+
 Enter expression (add ; to end, q to quit): 10 / 0;
 Error: Divide by zero
+
 Enter expression (add ; to end, q to quit): 10 % 3;
 Result: 1
+
 Enter expression (add ; to end, q to quit): 18 % 4;
 Result: 2
+
 Enter expression (add ; to end, q to quit): y;
 Error: Undefined variable: y
+
 Enter expression (add ; to end, q to quit): pi * 2;
 Result: 6.28319
+
 Enter expression (add ; to end, q to quit): sqrt(16);
 Result: 4
+
 Enter expression (add ; to end, q to quit): exp(1);
 Result: 2.71828
+
 Enter expression (add ; to end, q to quit): log(e);
 Result: 1
+
 Enter expression (add ; to end, q to quit): sqrt(25) + exp(log(4));
 Result: 9
+
 Enter expression (add ; to end, q to quit): sqrt(-1);
 Error: Square root of negative number
+
 Enter expression (add ; to end, q to quit): log(0);
 Error: Logarithm of non-positive number
