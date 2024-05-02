@@ -19,7 +19,6 @@ void init_variables() {
     variables["fibonacci"] = 3.359885666243178;
 }
 
-// Token structure
 struct token {
     char kind;
     double value;
@@ -30,74 +29,47 @@ struct token {
     token(char ch, std::string n) : kind(ch), name(n) {}
 };
 
-// Token stream for managing input tokens
 class token_stream {
     bool full;
     token buffer;
-
 public:
     token_stream() : full(false), buffer(0) {}
 
     token get();
-    void putback(token t);
+    void putback(token t) {
+        if (full) throw std::runtime_error("putback() into a full buffer");
+        buffer = t;
+        full = true;
+    }
     void ignore(char c);
 };
-
-void token_stream::putback(token t) {
-    if (full) throw std::runtime_error("putback() into a full buffer");
-    buffer = t;
-    full = true;
-}
 
 token token_stream::get() {
     if (full) {
         full = false;
         return buffer;
     }
-
     char ch;
-    std::cin >> std::ws; // Read whitespace
-    std::cin >> ch;
-
-    if (isalpha(ch)) {
-        std::string s;
-        s += ch;
-        while (std::cin.get(ch) && (isalnum(ch) || ch == '_')) s += ch;
-        std::cin.putback(ch);
-        if (s == "sqrt" || s == "exp" || s == "log")  // Handling more functions
-            return token('f', s); // 'f' for functions
-        if (variables.find(s) != variables.end())
-            return token('8', variables[s]); // '8' for numbers
-        if (s == "q") return token('q'); // 'q' for quit
-        return token('a', s); // 'a' for identifiers (variables)
-    }
-
+    std::cin >> std::ws >> ch;
 
     switch (ch) {
-        // Existing cases
-        case '=':
-            return token('=');
-    }
-
-    switch (ch) {
-        case ';':
-        case '(':
-        case ')':
-        case '+':
-        case '-':
-        case '*':
-        case '/':
-        case '%':
-        case 'q':
-            return token(ch);
-        case '.':
-        case '0': case '1': case '2': case '3': case '4':
-        case '5': case '6': case '7': case '8': case '9':
-            std::cin.putback(ch);
-            double val;
-            std::cin >> val;
-            return token('8', val);
+        case ';': case '(': case ')': case '+': case '-':
+        case '*': case '/': case '%': case '=':
+        case 'q': return token(ch);
         default:
+            if (isdigit(ch) || ch == '.') {
+                std::cin.putback(ch);
+                double val;
+                std::cin >> val;
+                return token('8', val);
+            } else if (isalpha(ch)) {
+                std::string s;
+                s += ch;
+                while (std::cin.get(ch) && (isalnum(ch) || ch == '_')) s += ch;
+                std::cin.putback(ch);
+                if (variables.count(s)) return token('a', s); // Return a variable token
+                return token('a', s); // Or potentially a function or new variable
+            }
             throw std::runtime_error("Bad token");
     }
 }
@@ -109,7 +81,7 @@ void token_stream::ignore(char c) {
     }
     full = false;
 
-    char ch = 0;
+    char ch;
     while (std::cin >> ch)
         if (ch == c) return;
 }
@@ -121,23 +93,21 @@ double expression();
 double primary() {
     token t = ts.get();
     switch (t.kind) {
-        case '8': // Handle number and constants directly
-            return t.value;
-        case 'a':
-            {
-                std::string var_name = t.name;
-                token next_token = ts.get();
-                if (next_token.kind == '=') {
-                    double value = expression();
-                    variables[var_name] = value; // Store the variable
-                    return value;
-                } else {
-                    ts.putback(next_token);
-                    if (variables.find(var_name) == variables.end())
-                        throw std::runtime_error("Undefined variable: " + var_name);
-                    return variables[var_name]; // Retrieve the variable's value
-                }
+        case '8': return t.value;
+        case 'a': {
+            std::string var_name = t.name;
+            token next_token = ts.get();
+            if (next_token.kind == '=') {
+                double value = expression();
+                variables[var_name] = value; // Assign a new value to the variable
+                return value;
+            } else {
+                ts.putback(next_token);
+                if (variables.find(var_name) == variables.end())
+                    throw std::runtime_error("Undefined variable: " + var_name);
+                return variables[var_name]; // Retrieve the variable's value
             }
+        }
 
         case '(':
             {
@@ -247,13 +217,14 @@ void calculate() {
     }
 }
 
+
 int main() {
+    init_variables();
     try {
         calculate();
-        return 0;
-    }
-    catch (...) {
+    } catch (...) {
         std::cerr << "Unknown exception!\n";
         return 2;
     }
+    return 0;
 }
