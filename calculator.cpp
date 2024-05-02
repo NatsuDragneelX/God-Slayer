@@ -93,22 +93,34 @@ double expression();
 double primary() {
     token t = ts.get();
     switch (t.kind) {
-        case '8': return t.value;
-        case 'a': {
-            std::string var_name = t.name;
-            token next_token = ts.get();
-            if (next_token.kind == '=') {
-                double value = expression();
-                variables[var_name] = value; // Assign a new value to the variable
-                return value;
+        case '8':
+            return t.value;
+        case 'a':
+            if (t.name == "sqrt") {
+                double d = primary(); // Get the argument for the function
+                if (d < 0) throw std::runtime_error("Square root of negative number");
+                return std::sqrt(d);
+            } else if (t.name == "exp") {
+                double d = primary(); // Get the argument for the function
+                return std::exp(d);
+            } else if (t.name == "log") {
+                double d = primary(); // Get the argument for the function
+                if (d <= 0) throw std::runtime_error("Logarithm of non-positive number");
+                return std::log(d);
             } else {
-                ts.putback(next_token);
-                if (variables.find(var_name) == variables.end())
-                    throw std::runtime_error("Undefined variable: " + var_name);
-                return variables[var_name]; // Retrieve the variable's value
+                std::string var_name = t.name;
+                token next_token = ts.get();
+                if (next_token.kind == '=') {
+                    double value = expression(); // Assign new value to variable
+                    variables[var_name] = value;
+                    return value;
+                } else {
+                    ts.putback(next_token);
+                    if (variables.find(var_name) == variables.end())
+                        throw std::runtime_error("Undefined variable: " + var_name);
+                    return variables[var_name]; // Retrieve the variable's value
+                }
             }
-        }
-
         case '(':
             {
                 double d = expression();
@@ -117,26 +129,12 @@ double primary() {
                 return d;
             }
         case '-':
-            return -primary();
-
-        case 'f':  // Handling function calls
-            if (t.name == "sqrt") {
-                double d = primary();
-                if (d < 0) throw std::runtime_error("Square root of negative number");
-                return std::sqrt(d);
-            } else if (t.name == "exp") {
-                double d = primary();
-                return std::exp(d);
-            } else if (t.name == "log") {
-                double d = primary();
-                if (d <= 0) throw std::runtime_error("Logarithm of non-positive number");
-                return std::log(d);
-            }
-            throw std::runtime_error("Unsupported function: " + t.name);
+            return -primary(); // For unary minus
         default:
             throw std::runtime_error("Primary expected");
     }
 }
+
 
 
 double term() {
